@@ -1,10 +1,16 @@
 import { compare } from "bcryptjs";
 import { signContext } from "../types";
 import { sign } from "hono/utils/jwt/jwt";
+import { signInSchema } from "@d0om/blogger-common";
 
 export default async function signIn(c : signContext){
     const body = await c.req.json();
     const Prisma = c.get("prisma");
+    const {success, error} = signInSchema.safeParse(body);
+    if(!success)
+        return c.json({
+            Error : error.format()
+        }, 400)
     try {
         const user = await Prisma.user.findFirst({
             where : {

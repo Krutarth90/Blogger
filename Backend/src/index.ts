@@ -5,6 +5,7 @@ import signIn from './functions/signin';
 import auth from './middlewares/auth';
 import { PrismaClient } from '@prisma/client/extension';
 import { newHono } from './types';
+import { postSchema, updatePost } from '@d0om/blogger-common';
 
 const app = new Hono<newHono>();
 
@@ -14,6 +15,11 @@ app.post('/api/v1/signin', prismaMake, signIn);
 
 app.post('/api/v1/blog', auth, prismaMake, async (c)=>{
     const body = await c.req.json();
+    const {success, error} = postSchema.safeParse(body);
+    if(!success)
+        return c.json({
+            Error : error.format()
+        }, 400);
     const prisma = c.get('prisma');
     const authId = c.get('userId');
     body.authId = authId;
@@ -37,6 +43,11 @@ app.post('/api/v1/blog', auth, prismaMake, async (c)=>{
 
 app.put('/api/v1/blog', auth, prismaMake, async (c)=>{
     const body = await c.req.json();
+    const {success, error} = updatePost.safeParse(body);
+    if(!success)
+        return c.json({
+            Error : error.format()
+        }, 400)
     const prisma = c.get('prisma');
     const authId = c.get('userId');
     body.authId = authId;
@@ -84,4 +95,19 @@ app.get('/api/v1/blog/:id', auth, prismaMake, async (c)=>{
         });
     }
 });
+
+app.get('/api/v1/blog/bulk', prismaMake, async (c)=>{
+    const prisma = c.get('prisma');
+    try {
+        const posts = await prisma.post.findMany();
+        c.json({
+            posts
+        });
+    } catch (e) {
+        console.log(e);
+        c.json({
+            message : " ERROR "
+        });
+    } 
+})
 export default app
