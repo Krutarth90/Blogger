@@ -3,7 +3,7 @@ import { signContext } from "../types";
 import { Next } from "hono";
 
 export default async function auth(c : signContext, next : Next) {
-    const bearer = c.req.header("authorization");
+    const bearer = c.req.header("Authorization");
     if(!bearer || !(bearer.startsWith("Bearer")))
         return c.json({
             msg : "invalid token"
