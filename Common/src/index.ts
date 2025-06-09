@@ -18,7 +18,8 @@ export type signUpType= z.infer<typeof signUpSchema>;
 export const postSchema = z.object({
     title : z.string(),
     content : z.string(),
-    authId : z.string()
+    authId : z.string(),
+    tags : z.array(z.string())
 })
 
 export type postType = z.infer<typeof postSchema>;
@@ -26,7 +27,8 @@ export type postType = z.infer<typeof postSchema>;
 export const updatePost = z.object({
     title : z.string(),
     content : z.string(),
-    id : z.string()
+    id : z.string(),
+    tags : z.array(z.string())
 })
 
 export type updatePostType = z.infer<typeof updatePost>;

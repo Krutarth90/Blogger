@@ -26,7 +26,7 @@ export default async function signup (c : signContext, next : Next) {
         const newPass = await hash(body.password, 10);
         await Prisma.user.create({
             data : {
-                name : body.name,
+                name : body.username,
                 email : body.email,
                 password : newPass
             }

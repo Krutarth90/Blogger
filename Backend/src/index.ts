@@ -9,6 +9,57 @@ import { postSchema, updatePost } from '@d0om/blogger-common';
 
 const app = new Hono<newHono>();
 
+app.use('*', async (c, next) => {
+  const allowedOrigins = ['http://localhost:5173', 'https://yourfrontenddomain.com'];
+  const origin = c.req.header('Origin');
+
+  if (origin && allowedOrigins.includes(origin)) {
+    c.res.headers.set('Access-Control-Allow-Origin', origin);
+  }
+
+  c.res.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  c.res.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  c.res.headers.set('Access-Control-Allow-Credentials', 'true');
+
+  return next();
+});
+
+app.options('*', (c) => {
+  const allowedOrigins = ['http://localhost:5173', 'https://yourfrontenddomain.com'];
+  const origin = c.req.header('Origin');
+
+  if (origin && allowedOrigins.includes(origin)) {
+    c.res.headers.set('Access-Control-Allow-Origin', origin);
+  }
+
+  c.res.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  c.res.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  c.res.headers.set('Access-Control-Allow-Credentials', 'true');
+
+  return c.json({}, 200);
+});
+
+
+
+app.get('/api/v1/user', prismaMake, auth, async (c)=>{
+    const prisma = c.get('prisma');
+    const id = c.get('userId');
+    try {
+        const user = await prisma.user.findFirst({
+            where : {
+                id
+            }
+        });
+        if(user)
+            user.password = "ITSSSECRET";
+        return c.json(user);
+    } catch (error) {
+        return c.json({
+            message : error
+        });
+    }
+});
+
 app.post('/api/v1/signup', prismaMake, signup);
 
 app.post('/api/v1/signin', prismaMake, signIn);
@@ -63,7 +114,8 @@ app.put('/api/v1/blog', auth, prismaMake, async (c)=>{
             },
             data : {
                 title : body.title,
-                content : body.content
+                content : body.content,
+                tags : body.tags
             }
         });
         return c.json({
@@ -102,8 +154,13 @@ app.get('/api/v1/blog/:id', auth, prismaMake, async (c)=>{
 
 app.get('/api/v1/bulk', prismaMake, async (c)=>{
     const prisma = c.get('prisma');
+    const pageNumber = +(c.req.query("page") || 1);
+    const limit = +(c.req.query("limit") || 12);
     try {
-        const posts = await prisma.post.findMany();
+        const posts = await prisma.post.findMany({
+            skip : (pageNumber - 1) * limit,
+            take : limit
+        });
         console.log(posts);
         return c.json({
             posts
