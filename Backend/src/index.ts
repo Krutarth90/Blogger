@@ -9,7 +9,7 @@ import { postSchema, updatePost } from '@d0om/blogger-common';
 const app = new Hono<newHono>();
 
 app.use('*', async (c, next) => {
-  const allowedOrigins = ['http://localhost:5173', 'https://yourfrontenddomain.com'];
+  const allowedOrigins = ['http://localhost:5173', 'https://blogger-topaz-six.vercel.app/'];
   const origin = c.req.header('Origin');
 
   if (origin && allowedOrigins.includes(origin)) {
@@ -24,7 +24,7 @@ app.use('*', async (c, next) => {
 });
 
 app.options('*', (c) => {
-  const allowedOrigins = ['http://localhost:5173', 'https://yourfrontenddomain.com'];
+  const allowedOrigins = ['http://localhost:5173', 'https://blogger-topaz-six.vercel.app/'];
   const origin = c.req.header('Origin');
 
   if (origin && allowedOrigins.includes(origin)) {
