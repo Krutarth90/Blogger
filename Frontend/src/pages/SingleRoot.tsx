@@ -3,6 +3,8 @@ import { pathAtom } from "../store/atoms"
 import Blogs from "./blogs";
 import CreateBlog from "./createBlog";
 import Profile from "./Profile";
+import { SignIn } from "./Signin";
+import { Signup } from "./signup";
 
 export function SingleRoot () {
 
@@ -18,5 +20,11 @@ export function SingleRoot () {
         
         case 'profile':
             return <Profile />;
+
+        case 'signin' :
+            return <SignIn />;
+        
+        case 'signup' :
+            return <Signup />;
     }
 }

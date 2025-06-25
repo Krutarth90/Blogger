@@ -173,19 +173,23 @@ export default function Topbar() {
               </div>
             ) : (
               <>
-                <a
-                  href="/signin"
+                <div
+                  onClick={() => {
+                    setPath('signin');
+                  }}
                   className="text-sm font-medium px-4 py-2 rounded hover:bg-gray-100 transition"
                   style={{ color: "#8E4B71" }}
                 >
                   Sign In
-                </a>
-                <a
-                  href="/signup"
+                </div>
+                <div
+                  onClick={() => {
+                    setPath('signup');
+                  }}
                   className="text-sm font-medium px-4 py-2 bg-[#8E4B71] text-white rounded hover:bg-[#7C3AED] transition"
                 >
                   Sign Up
-                </a>
+                </div>
               </>
             )}
           </div>

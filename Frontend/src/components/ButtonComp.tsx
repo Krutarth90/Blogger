@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { RecoilValue, useRecoilValue } from "recoil";
+import { RecoilValue, useRecoilValue, useSetRecoilState } from "recoil";
+import { pathAtom } from "../store/atoms";
 
 type SignData = {
   username?: string;
@@ -17,7 +18,7 @@ export function ButtonComp({
   selector: RecoilValue<SignData>;
 }) {
   const { URL, ...sign } = useRecoilValue(selector);
-  const navigate = useNavigate();
+  const setPath = useSetRecoilState(pathAtom);
 
   return (
     <div className="py-2">
@@ -26,10 +27,10 @@ export function ButtonComp({
           try {
             const res = await axios.post(URL, sign);
             if (res.data.msg === " Signed UP Succesfully. ") {
-              navigate("/signin");
+              setPath('signin');
             } else if (res.data.token) {
               localStorage.setItem("Authorization", `Bearer ${res.data.token}`);
-              navigate("/");
+              setPath('blogs');
             }
           } catch (error) {
             console.error("Signup/Login failed:", error);
