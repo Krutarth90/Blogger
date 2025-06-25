@@ -29,7 +29,13 @@ export default async function signIn(c : signContext){
                 msg : " Wrong Password "
             })
         }
-        const token = await sign({id : user.id}, c.env.JWT_SECRET);
+        const token = await sign({
+                id: user.id,
+                exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30, // 30 days
+            },
+            c.env.JWT_SECRET
+        );
+
         return c.json({
             token
         });

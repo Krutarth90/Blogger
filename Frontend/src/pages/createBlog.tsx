@@ -1,13 +1,13 @@
 "use client"
 
 import type React from "react"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import axios from "axios"
+import { useRecoilState, useRecoilValue } from "recoil"
+import { contentAtom, loggedInSelector, tagsAtom, titleAtom } from "../store/atoms.ts"
 
 
 
-// You should get this from your auth system
-const authToken = localStorage.getItem("Authorization");
 
 interface BlogData {
   title: string
@@ -16,51 +16,42 @@ interface BlogData {
 }
 
 export default function CreateBlog() {
-  const [loggedInAuthor, setAuthor] = useState('');
-  useEffect(()=>{
-    axios.get('https://backend.krutarthpipaliya90.workers.dev/api/v1/user', {
-            headers : {
-                Authorization : localStorage.getItem('Authorization')
-            }
-        })
-    .then(({data})=>{
-      setAuthor(data.name);
-    })
-  }, []);
-  
-  const [blogData, setBlogData] = useState<BlogData>({
-    title: "",
-    content: "",
-    tags: [],
-  })
+const [title, setTitle] = useRecoilState(titleAtom);
+const [content, setContent] = useRecoilState(contentAtom);
+const [tags, setTags] = useRecoilState(tagsAtom);
 
+const blogData: BlogData = {
+  title,
+  content,
+  tags,
+};
+
+  const loggedInAuthor = useRecoilValue(loggedInSelector);
   const [newTag, setNewTag] = useState("")
   const [activeTab, setActiveTab] = useState("write")
   const [isLoading, setIsLoading] = useState(false)
 
   const handleInputChange = (field: string, value: string) => {
-    setBlogData((prev) => ({
-      ...prev,
-      [field]: value,
-    }))
-  }
+    if (field === "title") {
+      setTitle(value);
+    } else if (field === "content") {
+      setContent(value);
+    }
+  };
+
 
   const addTag = () => {
-    if (newTag.trim() && !blogData.tags.includes(newTag.trim())) {
-      setBlogData((prev) => ({
-        ...prev,
-        tags: [...prev.tags, newTag.trim()],
-      }))
-      setNewTag("")
+    const trimmed = newTag.trim();
+    if (trimmed && !tags.includes(trimmed)) {
+      setTags([...tags, trimmed]);
+      setNewTag("");
     }
-  }
+  };
 
   const removeTag = (tagToRemove: string) => {
-    setBlogData((prev) => ({
-      ...prev,
-      tags: prev.tags.filter((tag) => tag !== tagToRemove),
-    }))
-  }
+    setTags(tags.filter((tag) => tag !== tagToRemove));
+  };
+
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
@@ -83,13 +74,13 @@ export default function CreateBlog() {
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: authToken,
+            Authorization: `${localStorage.getItem('Authorization')}`,
           },
         },
       )
 
       alert("Draft saved successfully!")
-      console.log("Draft saved:", response.data)
+      window.location.href='/';
     } catch (error) {
       console.error("Error saving draft:", error)
       alert("Failed to save draft. Please try again.")
@@ -111,58 +102,42 @@ export default function CreateBlog() {
         {
           title: blogData.title,
           content: blogData.content,
+          published : true,
           tags: blogData.tags,
-          published : true
         },
         {
           headers: {
             "Content-Type": "application/json",
-            Authorization: authToken,
+            Authorization: `${localStorage.getItem("Authorization")}`,
           },
         },
       )
 
       alert("Blog published successfully!")
-      console.log("Blog published:", response.data)
-
       // Reset form after successful publish
-      setBlogData({
-        title: "",
-        content: "",
-        tags: [],
-      })
+      window.location.href = `/blog/${response.data.id}`;
+      
     } catch (error) {
       console.error("Error publishing blog:", error)
       alert("Failed to publish blog. Please try again.")
     } finally {
       setIsLoading(false)
+      
     }
-  }
 
-  const estimateReadingTime = (content: string) => {
-    const wordsPerMinute = 200
-    const wordCount = content.trim().split(/\s+/).length
-    return Math.ceil(wordCount / wordsPerMinute)
   }
 
   const PreviewContent = () => (
-    <div className="prose prose-lg prose-gray max-w-none">
-      <h1 className="text-3xl font-bold mb-4 text-gray-900">{blogData.title || "Untitled Blog Post"}</h1>
+    <div className="prose prose-lg max-w-none">
+      <h1 className="text-3xl font-bold mb-4" style={{ color: "#502D55" }}>
+        {blogData.title || "Untitled Blog Post"}
+      </h1>
 
-      <div className="flex items-center gap-4 text-sm text-gray-600 mb-6">
-        <div className="flex items-center gap-2">
-          <span>📅</span>
-          <span>{new Date().toLocaleDateString()}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span>⏱️</span>
-          <span>{estimateReadingTime(blogData.content)} min read</span>
-        </div>
-      </div>
-
-      {loggedInAuthor && (
+      {loggedInAuthor.name && (
         <div className="mb-6">
-          <p className="font-semibold text-gray-900">{loggedInAuthor}</p>
+          <p className="font-semibold" style={{ color: "#502D55" }}>
+            {loggedInAuthor.name}
+          </p>
         </div>
       )}
 
@@ -171,7 +146,8 @@ export default function CreateBlog() {
           {blogData.tags.map((tag, index) => (
             <span
               key={index}
-              className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800"
+              className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+              style={{ backgroundColor: "#F3F4F6", color: "#8E4B71" }}
             >
               {tag}
             </span>
@@ -179,57 +155,55 @@ export default function CreateBlog() {
         </div>
       )}
 
-      <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">
+      <div className="whitespace-pre-wrap leading-relaxed" style={{ color: "#8E4B71" }}>
         {blogData.content || "Start writing your blog content..."}
       </div>
     </div>
   )
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header with Logo */}
-      <header className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-6xl mx-auto px-6 py-4">
-          <div className="flex items-center gap-3">
-            <img src="/BarLogo.png" alt="Blogger" className="h-8 w-auto" />
-            <div className="h-6 w-px bg-gray-300"></div>
-            <h1 className="text-xl font-semibold text-gray-900">Create New Post</h1>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen" style={{ background: "linear-gradient(135deg, #E6E0DA 0%, #F5F2EF 100%)" }}>
 
       <div className="max-w-6xl mx-auto p-6">
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Write Your Story</h2>
-          <p className="text-gray-600 mt-2">Share your thoughts with the world</p>
-          <div className="flex items-center gap-2 text-sm text-gray-600 mt-2">
+          <h2 className="text-2xl font-bold" style={{ color: "#502D55" }}>
+            Write Your Story
+          </h2>
+          <p className="mt-2" style={{ color: "#8E4B71" }}>
+            Share your thoughts with the world
+          </p>
+          <div className="flex items-center gap-2 text-sm mt-2" style={{ color: "#8E4B71" }}>
             <span>Writing as:</span>
-            <span className="font-medium text-orange-600">{loggedInAuthor}</span>
+            <span className="font-medium" style={{ color: "#7C3AED" }}>
+              {loggedInAuthor.name}
+            </span>
           </div>
         </div>
 
         <div className="space-y-6">
           {/* Tab Navigation */}
-          <div className="border-b border-gray-200">
-            <nav className="flex space-x-8">
+          <div className="border-b relative" style={{ borderColor: "#F3F4F6" }}>
+            <nav className="flex space-x-8 relative">
               <button
                 onClick={() => setActiveTab("write")}
-                className={`flex items-center gap-2 py-2 px-1 border-b-2 font-medium text-sm transition-colors duration-200 ${
-                  activeTab === "write"
-                    ? "border-orange-500 text-orange-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                className={`flex items-center gap-2 py-2 px-1 text-sm transition-all duration-300 ease-in-out font-extrabold relative z-10 ${
+                  activeTab === "write" ? "text-purple-600" : "hover:text-gray-600"
                 }`}
+                style={{
+                  color: activeTab === "write" ? "#7C3AED" : "#8E4B71",
+                }}
               >
                 <span>✏️</span>
                 Write
               </button>
               <button
                 onClick={() => setActiveTab("preview")}
-                className={`flex items-center gap-2 py-2 px-1 border-b-2 font-medium text-sm transition-colors duration-200 ${
-                  activeTab === "preview"
-                    ? "border-orange-500 text-orange-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                className={`flex items-center gap-2 py-2 px-1 text-sm transition-all duration-300 ease-in-out font-extrabold relative z-10 ${
+                  activeTab === "preview" ? "text-purple-600" : "hover:text-gray-600"
                 }`}
+                style={{
+                  color: activeTab === "preview" ? "#7C3AED" : "#8E4B71",
+                }}
               >
                 <span>👁️</span>
                 Preview
@@ -237,110 +211,245 @@ export default function CreateBlog() {
             </nav>
           </div>
 
-          {/* Write Tab Content */}
-          {activeTab === "write" && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Main Content */}
-                <div className="lg:col-span-2 space-y-6">
-                  <div className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-lg transition-shadow duration-300">
-                    <div className="px-6 py-4 border-b border-gray-200">
-                      <h3 className="text-lg font-semibold text-gray-900">Blog Content</h3>
-                    </div>
-                    <div className="p-6 space-y-4">
-                      <div>
-                        <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
-                          Title *
-                        </label>
-                        <input
-                          id="title"
-                          type="text"
-                          placeholder="Enter your blog title..."
-                          value={blogData.title}
-                          onChange={(e) => handleInputChange("title", e.target.value)}
-                          className="w-full px-3 py-2 text-lg font-semibold border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 hover:border-orange-400 transition-colors duration-200 bg-white text-gray-900"
-                        />
+          {/* Content Container with smooth transitions */}
+          <div className="relative overflow-hidden">
+            {/* Write Tab Content */}
+            <div
+              className={`transition-all duration-500 ease-in-out ${
+                activeTab === "write"
+                  ? "opacity-100 translate-x-0 relative"
+                  : "opacity-0 translate-x-[-100%] absolute top-0 left-0 w-full pointer-events-none"
+              }`}
+            >
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* Main Content */}
+                  <div className="lg:col-span-2 space-y-6">
+                    <div
+                      className="bg-white rounded-lg border shadow-sm hover:shadow-lg transition-all duration-300 hover:border-opacity-100"
+                      style={{
+                        borderColor: "#F3F4F6",
+                      }}
+                      onMouseEnter={(e) => {
+                        ;(e.currentTarget as HTMLElement).style.borderColor = "#8E4B71"
+                      }}
+                      onMouseLeave={(e) => {
+                        ;(e.currentTarget as HTMLElement).style.borderColor = "#F3F4F6"
+                      }}
+                    >
+                      <div className="px-6 py-4 border-b" style={{ borderColor: "#F3F4F6" }}>
+                        <h3 className="text-lg font-semibold" style={{ color: "#502D55" }}>
+                          Blog Content
+                        </h3>
                       </div>
-
-                      <div>
-                        <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-2">
-                          Content *
-                        </label>
-                        <textarea
-                          id="content"
-                          placeholder="Start writing your blog content here..."
-                          value={blogData.content}
-                          onChange={(e) => handleInputChange("content", e.target.value)}
-                          rows={20}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 hover:border-orange-400 transition-colors duration-200 resize-none bg-white text-gray-900"
-                        />
-                        <p className="text-sm text-gray-500 mt-2">
-                          {blogData.content.trim().split(/\s+/).length} words • {estimateReadingTime(blogData.content)}{" "}
-                          min read
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Sidebar */}
-                <div className="space-y-6">
-                  {/* Tags */}
-                  <div className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-lg transition-shadow duration-300">
-                    <div className="px-6 py-4 border-b border-gray-200">
-                      <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                        <span className="text-orange-500">#</span>
-                        Tags
-                      </h3>
-                    </div>
-                    <div className="p-6 space-y-4">
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          placeholder="Add a tag"
-                          value={newTag}
-                          onChange={(e) => setNewTag(e.target.value)}
-                          onKeyPress={handleKeyPress}
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 hover:border-orange-400 transition-colors duration-200 bg-white text-gray-900"
-                        />
-                        <button
-                          onClick={addTag}
-                          className="px-4 py-2 bg-orange-600 text-white text-sm font-medium rounded-md hover:bg-orange-700 hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
-                        >
-                          Add
-                        </button>
-                      </div>
-                      {blogData.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-2">
-                          {blogData.tags.map((tag, index) => (
-                            <span
-                              key={index}
-                              className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 hover:bg-orange-200 transition-colors duration-200 cursor-pointer"
-                            >
-                              {tag}
-                              <span
-                                className="cursor-pointer hover:text-red-500 transition-colors duration-200 font-bold"
-                                onClick={() => removeTag(tag)}
-                              >
-                                ×
-                              </span>
-                            </span>
-                          ))}
+                      <div className="p-6 space-y-4">
+                        <div>
+                          <label
+                            htmlFor="title"
+                            className="block text-sm font-medium mb-2"
+                            style={{ color: "#502D55" }}
+                          >
+                            Title *
+                          </label>
+                          <input
+                            id="title"
+                            type="text"
+                            placeholder="Enter your blog title..."
+                            value={blogData.title}
+                            onChange={(e) => handleInputChange("title", e.target.value)}
+                            className="w-full px-3 py-2 text-lg font-semibold border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 transition-colors duration-200 bg-white"
+                            style={{
+                              borderColor: "#F3F4F6",
+                              color: "#502D55",
+                            }}
+                            onFocus={(e) => {
+                              ;(e.target as HTMLInputElement).style.borderColor = "#7C3AED"
+                              ;(e.target as HTMLInputElement).style.boxShadow = "0 0 0 2px rgba(124, 58, 237, 0.2)"
+                            }}
+                            onBlur={(e) => {
+                              ;(e.target as HTMLInputElement).style.borderColor = "#F3F4F6"
+                              ;(e.target as HTMLInputElement).style.boxShadow = "none"
+                            }}
+                            onMouseEnter={(e) => {
+                              if (e.target !== document.activeElement) {
+                                ;(e.target as HTMLInputElement).style.borderColor = "#8E4B71"
+                              }
+                            }}
+                            onMouseLeave={(e) => {
+                              if (e.target !== document.activeElement) {
+                                ;(e.target as HTMLInputElement).style.borderColor = "#F3F4F6"
+                              }
+                            }}
+                          />
                         </div>
-                      )}
+
+                        <div>
+                          <label
+                            htmlFor="content"
+                            className="block text-sm font-medium mb-2"
+                            style={{ color: "#502D55" }}
+                          >
+                            Content *
+                          </label>
+                          <textarea
+                            id="content"
+                            placeholder="Start writing your blog content here..."
+                            value={blogData.content}
+                            onChange={(e) => handleInputChange("content", e.target.value)}
+                            rows={20}
+                            className="w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 transition-colors duration-200 resize-none bg-white"
+                            style={{
+                              borderColor: "#F3F4F6",
+                              color: "#502D55",
+                            }}
+                            onFocus={(e) => {
+                              ;(e.target as HTMLTextAreaElement).style.borderColor = "#7C3AED"
+                              ;(e.target as HTMLTextAreaElement).style.boxShadow = "0 0 0 2px rgba(124, 58, 237, 0.2)"
+                            }}
+                            onBlur={(e) => {
+                              ;(e.target as HTMLTextAreaElement).style.borderColor = "#F3F4F6"
+                              ;(e.target as HTMLTextAreaElement).style.boxShadow = "none"
+                            }}
+                            onMouseEnter={(e) => {
+                              if (e.target !== document.activeElement) {
+                                ;(e.target as HTMLTextAreaElement).style.borderColor = "#8E4B71"
+                              }
+                            }}
+                            onMouseLeave={(e) => {
+                              if (e.target !== document.activeElement) {
+                                ;(e.target as HTMLTextAreaElement).style.borderColor = "#F3F4F6"
+                              }
+                            }}
+                          />
+                          <p className="text-sm mt-2" style={{ color: "#8E4B71" }}>
+                            {blogData.content.trim().split(/\s+/).length} words
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Sidebar */}
+                  <div className="space-y-6">
+                    {/* Tags */}
+                    <div
+                      className="bg-white rounded-lg border shadow-sm hover:shadow-lg transition-all duration-300"
+                      style={{ borderColor: "#F3F4F6" }}
+                      onMouseEnter={(e) => {
+                        ;(e.currentTarget as HTMLElement).style.borderColor = "#8E4B71"
+                      }}
+                      onMouseLeave={(e) => {
+                        ;(e.currentTarget as HTMLElement).style.borderColor = "#F3F4F6"
+                      }}
+                    >
+                      <div className="px-6 py-4 border-b" style={{ borderColor: "#F3F4F6" }}>
+                        <h3 className="text-lg font-semibold flex items-center gap-2" style={{ color: "#502D55" }}>
+                          <span style={{ color: "#7C3AED" }}>#</span>
+                          Tags
+                        </h3>
+                      </div>
+                      <div className="p-6 space-y-4">
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            placeholder="Add a tag"
+                            value={newTag}
+                            onChange={(e) => setNewTag(e.target.value)}
+                            onKeyPress={handleKeyPress}
+                            className="flex-1 px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 transition-colors duration-200 bg-white"
+                            style={{
+                              borderColor: "#F3F4F6",
+                              color: "#502D55",
+                            }}
+                            onFocus={(e) => {
+                              ;(e.target as HTMLInputElement).style.borderColor = "#7C3AED"
+                              ;(e.target as HTMLInputElement).style.boxShadow = "0 0 0 2px rgba(124, 58, 237, 0.2)"
+                            }}
+                            onBlur={(e) => {
+                              ;(e.target as HTMLInputElement).style.borderColor = "#F3F4F6"
+                              ;(e.target as HTMLInputElement).style.boxShadow = "none"
+                            }}
+                            onMouseEnter={(e) => {
+                              if (e.target !== document.activeElement) {
+                                ;(e.target as HTMLInputElement).style.borderColor = "#8E4B71"
+                              }
+                            }}
+                            onMouseLeave={(e) => {
+                              if (e.target !== document.activeElement) {
+                                ;(e.target as HTMLInputElement).style.borderColor = "#F3F4F6"
+                              }
+                            }}
+                          />
+                          <button
+                            onClick={addTag}
+                            className="px-4 py-2 text-white text-sm font-medium rounded-md hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                            style={{
+                              backgroundColor: "#7C3AED",
+                              boxShadow: "0 0 0 2px rgba(124, 58, 237, 0.2)",
+                            }}
+                            onMouseEnter={(e) => {
+                              ;(e.target as HTMLButtonElement).style.backgroundColor = "#6D28D9"
+                            }}
+                            onMouseLeave={(e) => {
+                              ;(e.target as HTMLButtonElement).style.backgroundColor = "#7C3AED"
+                            }}
+                          >
+                            Add
+                          </button>
+                        </div>
+                        {blogData.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-2">
+                            {blogData.tags.map((tag, index) => (
+                              <span
+                                key={index}
+                                className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium transition-colors duration-200 cursor-pointer"
+                                style={{
+                                  backgroundColor: "#F3F4F6",
+                                  color: "#8E4B71",
+                                }}
+                                onMouseEnter={(e) => {
+                                  ;(e.target as HTMLSpanElement).style.backgroundColor = "#E5E7EB"
+                                }}
+                                onMouseLeave={(e) => {
+                                  ;(e.target as HTMLSpanElement).style.backgroundColor = "#F3F4F6"
+                                }}
+                              >
+                                {tag}
+                                <span
+                                  className="cursor-pointer hover:text-red-500 transition-colors duration-200 font-bold"
+                                  onClick={() => removeTag(tag)}
+                                >
+                                  ×
+                                </span>
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Action Buttons */}
-              <div className="flex justify-between items-center pt-6 border-t border-gray-200">
-                <div className="text-sm text-gray-500">Last saved: Never</div>
-                <div className="flex gap-3">
+                {/* Action Buttons */}
+                <div className="flex gap-3 justify-end pt-6 border-t" style={{ borderColor: "#F3F4F6" }}>
                   <button
                     onClick={saveDraft}
                     disabled={isLoading}
-                    className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 bg-white rounded-md hover:bg-gray-50 hover:scale-105 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                    className="flex items-center gap-2 px-4 py-2 border bg-white rounded-md hover:scale-105 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                    style={{
+                      borderColor: "#F3F4F6",
+                      color: "#502D55",
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isLoading) {
+                        ;(e.target as HTMLButtonElement).style.backgroundColor = "#F9FAFB"
+                        ;(e.target as HTMLButtonElement).style.borderColor = "#8E4B71"
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      ;(e.target as HTMLButtonElement).style.backgroundColor = "white"
+                      ;(e.target as HTMLButtonElement).style.borderColor = "#F3F4F6"
+                    }}
                   >
                     <span>💾</span>
                     {isLoading ? "Saving..." : "Save Draft"}
@@ -348,7 +457,19 @@ export default function CreateBlog() {
                   <button
                     onClick={publishBlog}
                     disabled={isLoading}
-                    className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 hover:scale-105 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                    className="flex items-center gap-2 px-4 py-2 text-white rounded-md hover:scale-105 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                    style={{
+                      backgroundColor: "#7C3AED",
+                      boxShadow: "0 0 0 2px rgba(124, 58, 237, 0.2)",
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isLoading) {
+                        ;(e.target as HTMLButtonElement).style.backgroundColor = "#6D28D9"
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      ;(e.target as HTMLButtonElement).style.backgroundColor = "#7C3AED"
+                    }}
                   >
                     <span>🚀</span>
                     {isLoading ? "Publishing..." : "Publish Blog"}
@@ -356,16 +477,25 @@ export default function CreateBlog() {
                 </div>
               </div>
             </div>
-          )}
 
-          {/* Preview Tab Content */}
-          {activeTab === "preview" && (
-            <div className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-lg transition-shadow duration-300">
-              <div className="p-8">
-                <PreviewContent />
+            {/* Preview Tab Content */}
+            <div
+              className={`transition-all duration-500 ease-in-out ${
+                activeTab === "preview"
+                  ? "opacity-100 translate-x-0 relative"
+                  : "opacity-0 translate-x-[100%] absolute top-0 left-0 w-full pointer-events-none"
+              }`}
+            >
+              <div
+                className="bg-white rounded-lg border shadow-sm hover:shadow-lg transition-shadow duration-300"
+                style={{ borderColor: "#F3F4F6" }}
+              >
+                <div className="p-8">
+                  <PreviewContent />
+                </div>
               </div>
             </div>
-          )}
+          </div>
         </div>
       </div>
     </div>

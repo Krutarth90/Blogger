@@ -3,7 +3,6 @@ import prismaMake from './middlewares/prismaMake';
 import signup from './functions/signup';
 import signIn from './functions/signin';
 import auth from './middlewares/auth';
-import { PrismaClient } from '@prisma/client/extension';
 import { newHono } from './types';
 import { postSchema, updatePost } from '@d0om/blogger-common';
 
@@ -60,6 +59,22 @@ app.get('/api/v1/user', prismaMake, auth, async (c)=>{
     }
 });
 
+app.get('/api/v1/myblogs', prismaMake, auth, async (c)=>{
+    const prisma = c.get('prisma');
+    const id = c.get('userId');
+    try {
+        const posts = await prisma.post.findMany({
+            where : {
+                authId : id
+            }
+        });
+        return c.json(posts);
+    } catch (error) {
+        return c.json({
+            message : error
+        });
+    }
+});
 app.post('/api/v1/signup', prismaMake, signup);
 
 app.post('/api/v1/signin', prismaMake, signIn);
@@ -115,7 +130,8 @@ app.put('/api/v1/blog', auth, prismaMake, async (c)=>{
             data : {
                 title : body.title,
                 content : body.content,
-                tags : body.tags
+                tags : body.tags,
+                published : body.published
             }
         });
         return c.json({
@@ -152,12 +168,65 @@ app.get('/api/v1/blog/:id', auth, prismaMake, async (c)=>{
     }
 });
 
+app.get('/api/v1/blog/:id', auth, prismaMake, async (c)=>{
+    const id = c.req.param("id");
+    const prisma = c.get('prisma');
+    try {
+        const post = await prisma.post.findFirst({
+            where : {
+                id
+            }
+        });
+        return c.json({
+            post
+        });
+    } catch (e) {
+        console.log(e);
+        c.json({
+            message : " ERROR "
+        });
+    }
+});
+
+app.delete('/api/v1/blog/delete', auth, prismaMake, async (c) => {
+  try {
+    const authId = c.get('userId');
+    const prisma = c.get('prisma');
+    const body = await c.req.json();
+
+    if (!body.id || !authId) {
+      return c.json({ message: "Missing required fields" }, 400);
+    }
+
+    const post = await prisma.post.findUnique({
+      where: { id: body.id }
+    });
+
+    if (!post || post.authId !== authId) {
+      return c.json({ message: "Unauthorized or blog not found" }, 403);
+    }
+
+    const deleted = await prisma.post.delete({
+      where: { id: body.id }
+    });
+
+    return c.json({ post: deleted });
+  } catch (e) {
+    console.error("Error deleting blog:", e);
+    return c.json({ message: "Failed to delete blog" }, 500);
+  }
+});
+
+
 app.get('/api/v1/bulk', prismaMake, async (c)=>{
     const prisma = c.get('prisma');
     const pageNumber = +(c.req.query("page") || 1);
     const limit = +(c.req.query("limit") || 12);
     try {
         const posts = await prisma.post.findMany({
+            where : {
+                published : true
+            },
             skip : (pageNumber - 1) * limit,
             take : limit
         });

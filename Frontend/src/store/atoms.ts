@@ -1,5 +1,10 @@
 import { atom, selector } from "recoil";
 
+export const pathAtom = atom({
+    key : "path",
+    default : "blogs"
+});
+
 export const usernameAtom = atom({
     key : "username",
     default : ""
@@ -15,7 +20,17 @@ export const passwordAtom = atom({
     default : ""
 });
 
-
+export const loggedInSelector = selector({
+    key : "loggedInSelector",
+    get : ({get}) => {
+        const name = get(usernameAtom)
+        const email = get(emailAtom);
+        return  {
+            name,
+            email,
+        }
+    }
+})
 
 export const signUpSelector = selector({
     key : "signUpSelector",
@@ -46,3 +61,32 @@ export const signInSelector = selector({
         }
     },
 })
+
+export const titleAtom = atom({
+    key : "titleAtom",
+    default : ""
+});
+
+export const contentAtom = atom({
+    key : "contentAtom",
+    default : ""
+});
+
+export const tagsAtom = atom<string[]>({
+  key: "tagsAtom",
+  default: []
+});
+
+export const postSelector = selector({
+    key : "postSelector",
+    get : ({get}) =>{
+        const title = get(titleAtom);
+        const content = get(contentAtom);
+        const tags = get(tagsAtom);
+        return {
+            title,
+            content,
+            tags
+        }
+    }
+});

@@ -20,17 +20,19 @@ export function Card({ children }: CardProps) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+    <div className="min-h-screen flex items-center justify-center px-4 bg-gradient-to-br from-[#F5F2EF] to-[#E6E0DA]">
       <div
         ref={cardRef}
         onMouseMove={handleMouseMove}
-        className="w-full max-w-sm relative rounded-xl p-6 transition-shadow duration-300 shadow-lg hover:shadow-2xl bg-white overflow-hidden"
+        className="relative w-full max-w-sm rounded-2xl border border-gray-100 bg-white p-6 shadow-md transition duration-300 ease-in-out hover:border-[#8E4B71] hover:shadow-lg overflow-hidden"
         style={{
-          backgroundImage: `radial-gradient(circle at ${gradientPos.x} ${gradientPos.y}, rgba(14,165,233,0.15), transparent 50%)`,
+          backgroundImage: `radial-gradient(circle at ${gradientPos.x} ${gradientPos.y}, rgba(142, 75, 113, 0.15), transparent 60%)`,
+          backgroundRepeat: "no-repeat",
+          backgroundSize: "100% 100%",
         }}
       >
         <div className="relative z-10">{children}</div>
-        <div className="absolute inset-0 bg-white/20 backdrop-blur-sm rounded-xl z-0 pointer-events-none"></div>
+        <div className="absolute inset-0 bg-white/40 backdrop-blur-sm rounded-2xl z-0 pointer-events-none" />
       </div>
     </div>
   );

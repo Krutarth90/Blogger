@@ -23,6 +23,8 @@ export default async function signup (c : signContext, next : Next) {
                 msg : " EMAIL ALREADY THERE "
             });
         }
+        if(!body.username || body.username == null)
+            body.username = body.email;
         const newPass = await hash(body.password, 10);
         await Prisma.user.create({
             data : {
