@@ -5,6 +5,7 @@ import CreateBlog from "./createBlog";
 import Profile from "./Profile";
 import { SignIn } from "./Signin";
 import { Signup } from "./signup";
+import EditBlog from "./Edit";
 
 export function SingleRoot () {
 
@@ -26,5 +27,8 @@ export function SingleRoot () {
         
         case 'signup' :
             return <Signup />;
+        
+        case 'edit' :
+            return <EditBlog />;
     }
 }

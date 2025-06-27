@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import axios from "axios"
 import { useRecoilValue, useSetRecoilState } from "recoil"
-import { contentAtom, loggedInSelector, pathAtom, tagsAtom, titleAtom } from "../store/atoms"
+import { blogIdAtom, contentAtom, loggedInSelector, pathAtom, tagsAtom, titleAtom } from "../store/atoms"
 import { Link } from "react-router-dom"
 
 
@@ -27,6 +27,7 @@ export default function Profile() {
   const setContent = useSetRecoilState(contentAtom);
   const setTags = useSetRecoilState(tagsAtom);
   const setPath = useSetRecoilState(pathAtom);
+  const setBlogId = useSetRecoilState(blogIdAtom);
   const fetchUserBlogs = async () => {
     try {
       setLoading(true)
@@ -310,7 +311,8 @@ export default function Profile() {
                             setTitle(post.title);
                             setContent(post.content);
                             setTags(post.tags);
-                            setPath('create');
+                            setBlogId(post.id);
+                            setPath('edit');
                           }}
                           className="inline-flex items-center px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transform hover:scale-105 transition-all duration-300"
                         >

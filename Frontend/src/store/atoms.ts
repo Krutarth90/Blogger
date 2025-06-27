@@ -77,6 +77,11 @@ export const tagsAtom = atom<string[]>({
   default: []
 });
 
+export const blogIdAtom = atom<string>({
+  key: "blogIdAtom",
+  default: ''
+});
+
 export const postSelector = selector({
     key : "postSelector",
     get : ({get}) =>{
