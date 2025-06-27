@@ -92,7 +92,7 @@ const blogData: BlogData = {
 
       alert("Blog edited successfully!")
       
-      navigate('profile');
+      navigate('/profile');
       
     } catch (error) {
       console.error("Error Editing blog:", error)
@@ -411,7 +411,7 @@ const blogData: BlogData = {
                 <div className="flex gap-3 justify-end pt-6 border-t" style={{ borderColor: "#F3F4F6" }}>
                   <button
                     onClick={() => {
-                        navigate('profile');
+                        navigate('/profile');
                     }}
                     disabled={isLoading}
                     className="flex items-center gap-2 px-4 py-2 border bg-white rounded-md hover:scale-105 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"

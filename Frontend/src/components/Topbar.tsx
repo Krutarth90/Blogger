@@ -107,7 +107,7 @@ export default function Topbar() {
                     
                     <a
                       onClick={()=>{
-                        navigate('profile');
+                        navigate('/profile');
                         setIsProfileOpen(false);
                       }}
                       className="block px-4 py-3 text-base hover:bg-gray-50 transition-colors duration-200"
@@ -123,7 +123,7 @@ export default function Topbar() {
                         setTitle('');
                         setContent('');
                         setTags([]);
-                        navigate('create');
+                        navigate('/create');
                         setIsProfileOpen(false);
                       }}
                       className="block px-4 py-3 text-base hover:bg-gray-50 transition-colors duration-200"

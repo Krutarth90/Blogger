@@ -231,7 +231,7 @@ export default function Profile() {
                     setTitle('');
                     setContent('');
                     setTags([]);
-                    navigate('create');
+                    navigate('/create');
                   }}
 
                   className="inline-flex items-center px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
@@ -312,7 +312,7 @@ export default function Profile() {
                             setContent(post.content);
                             setTags(post.tags);
                             setBlogId(post.id);
-                            navigate('edit');
+                            navigate('/edit');
                           }}
                           className="inline-flex items-center px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transform hover:scale-105 transition-all duration-300"
                         >

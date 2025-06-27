@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { RecoilValue, useRecoilValue, useSetRecoilState } from "recoil";
+import { RecoilValue, useRecoilValue} from "recoil";
 
 type SignData = {
   username?: string;
@@ -25,10 +25,10 @@ export function ButtonComp({
           try {
             const res = await axios.post(URL, sign);
             if (res.data.msg === " Signed UP Succesfully. ") {
-              navigate('signin');
+              navigate('/signin');
             } else if (res.data.token) {
               localStorage.setItem("Authorization", `Bearer ${res.data.token}`);
-              navigate('blogs');
+              navigate('/blogs');
             }
           } catch (error) {
             console.error("Signup/Login failed:", error);
