@@ -1,10 +1,5 @@
 import { atom, selector } from "recoil";
 
-export const pathAtom = atom({
-    key : "path",
-    default : "blogs"
-});
-
 export const usernameAtom = atom({
     key : "username",
     default : ""

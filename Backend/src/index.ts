@@ -59,6 +59,24 @@ app.get('/api/v1/user', prismaMake, auth, async (c)=>{
     }
 });
 
+app.get('/api/v1/user/:id', prismaMake, async (c)=>{
+    const prisma = c.get('prisma');
+    const id = c.req.param("id");
+    try {
+        const user = await prisma.user.findFirst({
+            where : {
+                id
+            }
+        });
+        if(user)
+            user.password = "ITSSSECRET";
+        return c.json(user);
+    } catch (error) {
+        return c.json({
+            message : error
+        });
+    }
+});
 app.get('/api/v1/myblogs', prismaMake, auth, async (c)=>{
     const prisma = c.get('prisma');
     const id = c.get('userId');

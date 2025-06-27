@@ -70,10 +70,26 @@ export default function Blogs() {
                       <h3 className="text-xl font-semibold text-[#502D55] hover:text-[#7C3AED] transition-colors">
                         <Link to={`/blog/${post.id}`}>{post.title}</Link>
                       </h3>
+
                       <p className="mt-3 text-sm text-[#8E4B71] line-clamp-3">
                         {post.content}
                       </p>
+
+                      {/* ✅ Tags Section */}
+                      {post.tags && post.tags.length > 0 && (
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          {post.tags.map((tag: string, index: number) => (
+                            <span
+                              key={index}
+                              className="inline-block text-xs font-medium px-2.5 py-0.5 rounded-full bg-[#F3F4F6] text-[#8E4B71]"
+                            >
+                              #{tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
+
                     <div className="mt-6 flex items-center gap-3">
                       <img
                         src={`https://api.dicebear.com/7.x/notionists/svg?seed=${post.authId}`}

@@ -3,8 +3,9 @@
 import type React from "react"
 import { useState } from "react"
 import axios from "axios"
-import { useRecoilState, useRecoilValue, useSetRecoilState } from "recoil"
-import { blogIdAtom, contentAtom, loggedInSelector, pathAtom, tagsAtom, titleAtom } from "../store/atoms.ts"
+import { useRecoilState, useRecoilValue } from "recoil"
+import { blogIdAtom, contentAtom, loggedInSelector, tagsAtom, titleAtom } from "../store/atoms.ts"
+import { useNavigate } from "react-router-dom"
 
 
 
@@ -21,7 +22,7 @@ const [title, setTitle] = useRecoilState(titleAtom);
 const [content, setContent] = useRecoilState(contentAtom);
 const [tags, setTags] = useRecoilState(tagsAtom);
 const id = useRecoilValue(blogIdAtom);
-const setPath = useSetRecoilState(pathAtom);
+const navigate = useNavigate();
 const blogData: BlogData = {
   id,
   title,
@@ -91,7 +92,7 @@ const blogData: BlogData = {
 
       alert("Blog edited successfully!")
       
-      setPath('profile');
+      navigate('profile');
       
     } catch (error) {
       console.error("Error Editing blog:", error)
@@ -410,7 +411,7 @@ const blogData: BlogData = {
                 <div className="flex gap-3 justify-end pt-6 border-t" style={{ borderColor: "#F3F4F6" }}>
                   <button
                     onClick={() => {
-                        setPath('profile');
+                        navigate('profile');
                     }}
                     disabled={isLoading}
                     className="flex items-center gap-2 px-4 py-2 border bg-white rounded-md hover:scale-105 hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"

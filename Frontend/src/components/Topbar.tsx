@@ -2,18 +2,19 @@
 
 import { useEffect, useState } from "react"
 import { useRecoilValue, useSetRecoilState } from "recoil"
-import { contentAtom, emailAtom, loggedInSelector, pathAtom, tagsAtom, titleAtom, usernameAtom } from "../store/atoms"
+import { contentAtom, emailAtom, loggedInSelector, tagsAtom, titleAtom, usernameAtom } from "../store/atoms"
 import axios from "axios"
+import { useNavigate } from "react-router-dom"
 
 export default function Topbar() {
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const loggedInUser = useRecoilValue(loggedInSelector)
   const setUsername = useSetRecoilState(usernameAtom)
   const setEmail = useSetRecoilState(emailAtom)
-  const setPath = useSetRecoilState(pathAtom);
   const setTitle = useSetRecoilState(titleAtom);
   const setContent = useSetRecoilState(contentAtom);
   const setTags = useSetRecoilState(tagsAtom);
+  const navigate = useNavigate();
     useEffect(() => {
     const token = localStorage.getItem("Authorization")
     if (token && loggedInUser.email === "") {
@@ -52,7 +53,7 @@ export default function Topbar() {
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
           <a onClick={()=>{
-              setPath('blogs');
+              navigate('/')
               setIsProfileOpen(false);
             }}
             className="flex-shrink-0">
@@ -106,7 +107,7 @@ export default function Topbar() {
                     
                     <a
                       onClick={()=>{
-                        setPath('profile');
+                        navigate('profile');
                         setIsProfileOpen(false);
                       }}
                       className="block px-4 py-3 text-base hover:bg-gray-50 transition-colors duration-200"
@@ -122,7 +123,7 @@ export default function Topbar() {
                         setTitle('');
                         setContent('');
                         setTags([]);
-                        setPath('create');
+                        navigate('create');
                         setIsProfileOpen(false);
                       }}
                       className="block px-4 py-3 text-base hover:bg-gray-50 transition-colors duration-200"
@@ -133,7 +134,7 @@ export default function Topbar() {
                       ✍️ Write a Blog
                     </a>
 
-                    <a
+                    {/* <a
                       href="/settings"
                       className="block px-4 py-3 text-base hover:bg-gray-50 transition-colors duration-200"
                       style={{ color: "#8E4B71" }}
@@ -151,7 +152,7 @@ export default function Topbar() {
                       onMouseLeave={(e) => ((e.target as HTMLElement).style.color = "#8E4B71")}
                     >
                       ❓ Help
-                    </a>
+                    </a> */}
 
                     <hr className="my-2" style={{ borderColor: "#F3F4F6" }} />
 
@@ -175,7 +176,7 @@ export default function Topbar() {
               <>
                 <div
                   onClick={() => {
-                    setPath('signin');
+                    window.location.href ='signin';
                   }}
                   className="text-sm font-medium px-4 py-2 rounded hover:bg-gray-100 transition"
                   style={{ color: "#8E4B71" }}
@@ -184,7 +185,7 @@ export default function Topbar() {
                 </div>
                 <div
                   onClick={() => {
-                    setPath('signup');
+                    window.location.href ='signup';
                   }}
                   className="text-sm font-medium px-4 py-2 bg-[#8E4B71] text-white rounded hover:bg-[#7C3AED] transition"
                 >

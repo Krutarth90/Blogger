@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react"
 import axios from "axios"
 import { useRecoilValue, useSetRecoilState } from "recoil"
-import { blogIdAtom, contentAtom, loggedInSelector, pathAtom, tagsAtom, titleAtom } from "../store/atoms"
-import { Link } from "react-router-dom"
+import { blogIdAtom, contentAtom, loggedInSelector, tagsAtom, titleAtom } from "../store/atoms"
+import { Link, useNavigate } from "react-router-dom"
 
 
 type Post = {
@@ -26,8 +26,8 @@ export default function Profile() {
   const setTitle = useSetRecoilState(titleAtom);
   const setContent = useSetRecoilState(contentAtom);
   const setTags = useSetRecoilState(tagsAtom);
-  const setPath = useSetRecoilState(pathAtom);
   const setBlogId = useSetRecoilState(blogIdAtom);
+  const navigate = useNavigate();
   const fetchUserBlogs = async () => {
     try {
       setLoading(true)
@@ -231,7 +231,7 @@ export default function Profile() {
                     setTitle('');
                     setContent('');
                     setTags([]);
-                    setPath('create');
+                    navigate('create');
                   }}
 
                   className="inline-flex items-center px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
@@ -312,7 +312,7 @@ export default function Profile() {
                             setContent(post.content);
                             setTags(post.tags);
                             setBlogId(post.id);
-                            setPath('edit');
+                            navigate('edit');
                           }}
                           className="inline-flex items-center px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transform hover:scale-105 transition-all duration-300"
                         >
