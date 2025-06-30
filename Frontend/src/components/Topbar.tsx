@@ -176,7 +176,7 @@ export default function Topbar() {
               <>
                 <div
                   onClick={() => {
-                    window.location.href ='signin';
+                    navigate('/signin');
                   }}
                   className="text-sm font-medium px-4 py-2 rounded hover:bg-gray-100 transition"
                   style={{ color: "#8E4B71" }}
@@ -185,7 +185,7 @@ export default function Topbar() {
                 </div>
                 <div
                   onClick={() => {
-                    window.location.href ='signup';
+                    navigate('/signup');
                   }}
                   className="text-sm font-medium px-4 py-2 bg-[#8E4B71] text-white rounded hover:bg-[#7C3AED] transition"
                 >

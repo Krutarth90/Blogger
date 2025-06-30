@@ -12,7 +12,7 @@ export function Signup (){
             <Heading text = "Sign Up"/>
             <IpBox Heading = "Name" placeholder="Name" atom = {usernameAtom}/>
             <IpBox Heading = "email" placeholder="email" atom = {emailAtom}/>
-            <IpBox Heading = "password" placeholder="password" atom = {passwordAtom}/>
+            <IpBox  type = "password" Heading = "password" placeholder="password" atom = {passwordAtom}/>
             <ButtonComp text="SignUp" selector={ signUpSelector }/>
             <Bottom text="Signed Up before?" toLabel="Sign In" to="/signin"/>
         </Card>

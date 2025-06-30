@@ -9,7 +9,7 @@ import { postSchema, updatePost } from '@d0om/blogger-common';
 const app = new Hono<newHono>();
 
 app.use('*', async (c, next) => {
-  const allowedOrigins = ['http://localhost:5173', 'https://blogger-topaz-six.vercel.app'];
+  const allowedOrigins = ['http://localhost:5173', 'https://blogger-d0om.vercel.app'];
   const origin = c.req.header('Origin');
 
   if (origin && allowedOrigins.includes(origin)) {
@@ -24,7 +24,7 @@ app.use('*', async (c, next) => {
 });
 
 app.options('*', (c) => {
-  const allowedOrigins = ['http://localhost:5173', 'https://blogger-topaz-six.vercel.app'];
+  const allowedOrigins = ['http://localhost:5173', 'https://blogger-d0om.vercel.app'];
   const origin = c.req.header('Origin');
 
   if (origin && allowedOrigins.includes(origin)) {
@@ -166,13 +166,14 @@ app.put('/api/v1/blog', auth, prismaMake, async (c)=>{
     }
 });
 
-app.get('/api/v1/blog/:id', auth, prismaMake, async (c)=>{
+app.get('/api/v1/blog/:id', prismaMake, async (c)=>{
     const id = c.req.param("id");
     const prisma = c.get('prisma');
     try {
         const post = await prisma.post.findFirst({
             where : {
-                id
+                id,
+                published : true
             }
         });
         return c.json({
