@@ -28,7 +28,7 @@ export function ButtonComp({
               navigate('/signin');
             } else if (res.data.token) {
               localStorage.setItem("Authorization", `Bearer ${res.data.token}`);
-              navigate('/blogs');
+              navigate('/');
             }
           } catch (error) {
             console.error("Signup/Login failed:", error);
